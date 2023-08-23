@@ -1,11 +1,11 @@
 TASITS_SPINS
 ===============================================
 
-Comparing TASIT and TSPINS
+Comparing TASIT and TASIT-S in SPINS
 
 Created by Ayowale Olorunsola ayowale.olorunsola@camh.ca
 
-**SEE STARTUP.MD FOR INSTRUCTIONS ON CREATING A GIT REPO**
+
 
 Project Organization
 -----------------------------------
@@ -13,18 +13,23 @@ Project Organization
     .
     ├── README.md          <- The top-level README
     ├── .gitignore         <- Files to not upload to github - by default includes /data
-    ├── LICENSE            <- usage license if applicable
     ├── data
-    │   ├── processed      <- The final dataset (can include subfolders etc)
-    │   └── raw            <- The original dataset, generally a link to minimally preprocessed data
+    │   └── raw            <- The original dataset
     │
-    ├── notebooks          <- Jupyter/R notebooks for analysis workflow - Naming should begin with a number, followed by an underscore and a description (e.g. 01_compile_demographics.Rmd)
+    ├── notebooks          <- R notebooks for analysis workflow 
     │
     ├── docs/references    <- Data dictionaries, manuals, and all other explanatory materials
     │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
+    ├── paper              <- Drafts and resources for manuscript
     │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment (if applicable)
     │
-    ├── code/src           <- Source code for use in this project (virtual environments, bash scripts, etc)
+    ├── code               <- Source code for use in this project (virtual environments, bash scripts, etc)
+    
+    DATA
+    spins_tasit_data_06-23-2023.csv - TASIT and TASIT-S data
+    
+    NOTEBOOKS
+    TASITS_Project.Rmd - analysis script for TASIT-S including correlations and group comparisons. 
+    
+    
+
