@@ -4,9 +4,9 @@ output: html_notebook
 ---
 
 ```{r}
-#Summary: TASIT-S is a shorter form of TASIT. Both tests have 3 subtests. These substests contain items whose scores are added together to come up with total scores for the subtest. In order to prove the validity of TASIT-S, the scores from the three subtests in TASIT-S were correlated with the scores of the subtests from the original TASIT. The scores of controls and patients were put together in TASIT:S and were compared with the scores of controls and pateints in the  original TASIT. Later on, these same correaltions between subtests from TASIT:S vs TASIT were made, but only looking at the scores of controls in TASIT:S vs TASIT and then only looking at the scores of patients in TASIT:S vs TASIT
+#Summary: The awareness of social inference test (TASIT) is a test that assesses social perception in individuals with social cognitive deficits. However, the long administration time of this test can be burdensome for participants and patients. TASIT-S is a short form of TASIT, and has been validated and used in acquired brain injury and dementia populations. However, this has not been done in schizophrenia spectrum disorders (SSDs), and doing so would allow its use in future clinical trials. Both forms of the test have 3 subtests. Each substest contains items whose scores are added together to come up with a total score for the subtest. In order to assess the validity of TASIT-S, TASIT-S subscores are correlated with TASIT subscores.
 
-# Note:'We're most interested in with these different analyses is determining whether we are capturing the same 'information' of interest using the TASIT-S as we have been with the full TASIT in people with SSDs (and across SSDs and healthy controls). We're doing this the same way they did in the Honan paper, using correlations between the orig and TASIT-S scores to see how similar (how highly correlated) they are, as well as correlations with other measures we know to be related to the original full TASIT, including social cognitive measures most importantly, as well as neurocog measures, clinical measures (SANS especially), and functioning measures (BSFS and QLS). We are doing the t-tests between groups to see if the orig TASIT and TASIT-S scores show similar differentiation between our case (SSDs) and control groups (i.e., are similar group differences seen with the orig TASIT and TASIT-S scores, based on the p values and effect sizes)
+#Note: We're most interested in with these different analyses is determining whether we are capturing the same 'information' of interest using the TASIT-S as we have been with the full TASIT in people with SSDs (and across SSDs and healthy controls). We're doing this the same way they did in the Honan paper, using correlations between the orig and TASIT-S scores to see how similar (how highly correlated) they are, as well as correlations with other measures we know to be related to the original full TASIT, including social cognitive measures most importantly, as well as neurocog measures, clinical measures (SANS especially), and functioning measures (BSFS and QLS). We are doing the t-tests between groups to see if the orig TASIT and TASIT-S scores show similar differentiation between our case (SSDs) and control groups (i.e., are similar group differences seen with the orig TASIT and TASIT-S scores, based on the p values and effect sizes).
 ```
 
 
@@ -14,24 +14,23 @@ output: html_notebook
 ```{r}
 #Note: In this script, the terms "case group", "SSDs", and "patients/patient group" are used interchangeably
 library(tidyverse)
-#Inputting the necessary datasets: TASIT Item scores dataset + other measures dataset
+#Inputting the necessary datasets: TASIT Item scores dataset 
 spinsdata <- read.csv(file="/projects/aolorunsola/TASITS_SPINS/data/raw/spins_tasit_data_06-23-2023.csv",header=TRUE)
 
-#Refining original "spinsdata" dataset to only include participants that are found in "spins_df" dataset (which contains some other measures that are not from TASIT). Essentially removing participant data that isn't useful to us. We only want participants that have both TASIT data as well as the other relevant measures because we will be making correlations using both.
-
-#Loading in dataset that contains other relevant measures (other SPINS soc/cog data):
+#Inputting necessary datasets: dataset that contains other relevant measures (other SPINS soc/cog data, as well as some other measures):
 spins_df <- read.csv("/projects/loliver/SPINS_PLS_Conn/data/processed/spins_behav_data_full_03-03-2022.csv", header = T, stringsAsFactors = F)
-# remove MPRC site participants as they do not have the individual TASIT items captured. 
+#remove MPRC site participants as they do not have the individual TASIT items captured (don't need these participants in the dataset). 
 spins_df <- spins_df[spins_df$site!="mrc",]
 
-# filter "spinsdata" dataset to drop participants that are not in cleaned spins_df: 
+#Refining "spinsdata" dataset to only include participants that are found in "spins_df" dataset (which contains some other measures that are not from TASIT). We only want participants that have both TASIT data as well as data for the other relevant measures because we will be making correlations using both.
+#filter "spinsdata" dataset to drop participants that are not in cleaned spins_df: 
 spinsdata <- spinsdata[spinsdata$record_id %in% spins_df$record_id,]
 #This subsets the "spinsdata" dataframe to only include participants who were in the "spinsdf" dataframe.
 
-#Removing participants that have missing TASIT data from "spinsdata" dataset. Missingness was determined in lines 337-343 of script:
+#Removing participants that have missing TASIT data from "spinsdata" dataset. TASIT score missingness was determined in lines 337-343 of this script:
 spinsdata <- spinsdata[!(spinsdata$record_id == "SPN01_ZHP_0094" | spinsdata$record_id == "SPN01_ZHP_0140" | spinsdata$record_id == "SPN01_ZHP_0144" | spinsdata$record_id == "SPN01_CMH_0010" | spinsdata$record_id == "SPN01_CMH_0045" | spinsdata$record_id == "SPN01_CMH_0161" | spinsdata$record_id == "SPN01_CMP_0183" | spinsdata$record_id == "SPN01_ZHH_0059" | spinsdata$record_id == "SPN01_ZHP_0092" | spinsdata$record_id == "SPN01_ZHP_0100" | spinsdata$record_id == "SPN01_ZHP_0103" | spinsdata$record_id == "SPN01_ZHP_0110" | spinsdata$record_id == "SPN01_ZHP_0164" | spinsdata$record_id == "SPN01_ZHP_0172"),]
 
-#Should then also remove these participants from the "spins_df" dataset so thta each datset contains the same particpants. 
+#Should then also remove these participants from the "spins_df" dataset so that each datset contains the same particpants. 
 spins_df <- spins_df[!(spins_df$record_id == "SPN01_ZHP_0094" | spins_df$record_id == "SPN01_ZHP_0140" | spins_df$record_id == "SPN01_ZHP_0144" | spins_df$record_id == "SPN01_CMH_0010" | spins_df$record_id == "SPN01_CMH_0045" | spins_df$record_id == "SPN01_CMH_0161" | spins_df$record_id == "SPN01_CMP_0183" | spins_df$record_id == "SPN01_ZHH_0059" | spins_df$record_id == "SPN01_ZHP_0092" | spins_df$record_id == "SPN01_ZHP_0100" | spins_df$record_id == "SPN01_ZHP_0103" | spins_df$record_id == "SPN01_ZHP_0110" | spins_df$record_id == "SPN01_ZHP_0164" | spins_df$record_id == "SPN01_ZHP_0172"),]
 ```
 
@@ -46,7 +45,7 @@ spinsdata <- spinsdata %>%
          "tasit_part3_lies" = "tasit_part3_grandtotal_lies",
          "tasit_part3_sarc" = "tasit_part3_grandtotal_sarcasm")
 
-#TASIT-S Part 1 items (The items included: 3 happy, 4 revolted, 9 revolted, 13 neutral, 14 anxious, 18 angry, 19 neutral,22 revolted, 25 anxious, and 27 sad from the original TASIT)
+#TASIT-S Part 1 items: (The items included: 3 happy, 4 revolted, 9 revolted, 13 neutral, 14 anxious, 18 angry, 19 neutral,22 revolted, 25 anxious, and 27 sad from the original TASIT)
 #re-coding items to be either correct or incorrect (for questions that had multiple choices, but only one right answer). This is done so that we can calculate a total score for TASIT Part 1 by adding the item scores together
 #"ifelse" is the function that makes it correct or incorrect.
 
@@ -74,8 +73,8 @@ spinsdata$tasit_27_michael<- ifelse(spinsdata$tasit_27_michael == 4, 1, 0)
 
 
 ```{r}
-# Code for TASIT-S:1 (creating TASIT-S:1 scores)
-#rowSums (used to add scores from the multiple tests (items) within Tasit-S:1 so that we can get a total score for TASIT-S:1)
+#Code for TASIT-S Part 1 (creating TASIT-S:1 scores)
+#rowSums (used to add scores from the multiple items within TASIT-S:1 so that we can get a total score for TASIT-S:1)
 spinsdata$tasits_part1_total <- rowSums(spinsdata[,c("tasit_3_olivia", "tasit_4_olivia", "tasit_9_mm", "tasit_13_mz", "tasit_14_mick", "tasit_18_michael", "tasit_19_ruth", "tasit_22_michael", "tasit_25_km", "tasit_27_michael")]) 
 
 #Now making correlations between TASIT Part 1 and TASIT-S Part 1 total scores:
@@ -91,8 +90,8 @@ cor.test(spinsdata$tasit_part1_total, spinsdata$tasits_part1_total,
 
 
 ```{r}
-# Code for TASIT-S:2 (creating TASIT-S:2 scores)
-# TASIT:S Part 2: For Sincere, a final four-item subtest was produced which included items 1, 4, 11, and 14 from the original TASIT. 
+#Code for TASIT-S Part 2 (creating TASIT-S:2 scores)
+#TASIT:S Part 2: For Sincere, a final four-item subtest was produced which included items 1, 4, 11, and 14 from the original TASIT. 
 spinsdata$tasits_part2_sinc<- rowSums(spinsdata[,c("tasit_part2_1_weekend_away_total", "tasit_part2_4_lunch_total", "tasit_part2_11_tickets_total", "tasit_part2_14_shirt_total")])
 
 #TASIT:S Part 2: For Sarcasm, a final five-item subtest was produced which included items 2, 5, 10, 13, and 15 from the original TASIT. 
@@ -131,8 +130,7 @@ cor.test(spinsdata$tasit_part2_sarc, spinsdata$tasits_part2_sarc,
 
 
 ```{r}
-# Code for TASIT-S:3 (creating TASIT-S:3 scores)
-
+# Code for TASIT-S Part 3 (creating TASIT-S:3 scores)
 #TASIT-S Part 3 Lies: For Lies, a final four-item subtest was produced which included items 7, 13, 15, and 16 from the original TASIT.
 spinsdata$tasits_part3_lies <- rowSums(spinsdata[,c("tasit_part3_7_icecream_total_visual", "tasit_part3_13_moving_total_text", "tasit_part3_15_crossword_total_visual", "tasit_part3_16_enough_eat_total_text")])
 
@@ -153,7 +151,7 @@ cor.test(spinsdata$tasit_part3_total, spinsdata$tasits_part3_total)
 cor.test(spinsdata$tasit_part3_total, spinsdata$tasits_part3_total,
          method = "spearman", exact = FALSE)
 
-#Correlating "lies" scores
+##correlation between TASIT-S:3 lies and TASIT:3 lies
 cor(na.omit(spinsdata[c("tasits_part3_lies", "tasit_part3_lies")]))
 #correlation that produces p values:
 cor.test(spinsdata$tasits_part3_lies, spinsdata$tasit_part3_lies)
@@ -162,7 +160,7 @@ cor.test(spinsdata$tasits_part3_lies, spinsdata$tasit_part3_lies,
          method = "spearman", exact = FALSE)
 
 
-#Correlating "sarcasm" scores
+#correlation between TASIT-S:3 sarcasm and TASIT:3 sarcasm
 cor(na.omit(spinsdata[c("tasits_part3_sarc", "tasit_part3_sarc")]))
 #correlation that produces p values:
 cor.test(spinsdata$tasits_part3_sarc, spinsdata$tasit_part3_sarc)
@@ -174,17 +172,17 @@ cor.test(spinsdata$tasits_part3_sarc, spinsdata$tasit_part3_sarc,
 
 
 ```{r}
-#So, in TASIT-S Part 1, we set all of our item scores to either correct or incorrect, then we added all of our item scores together for a total TASIT-S Part 1 score. For TASIT-S Part 2, we added the total scores for the sincere section of the test to get a total sincere score, then we did the same thing for the sarcastic score (=paradoxical sarcasm + simple sarcasm scores) to get a total sarcastic score. We then added the two together to get a total TASIT:S Part 2 score. For TASIT:S Part 3, a total lies score is calculated, as well as a total sarcasm score, and the two are added together to get the total TASIT:S Part 3 score.
+#So, in TASIT-S Part 1, we set all of the item scores to either correct or incorrect, then we added all of these item scores together for a total TASIT-S Part 1 score. For TASIT-S Part 2, we added the total scores for the sincere section of the test to get a total sincere score, then we did the same thing for the sarcastic score (= paradoxical sarcasm + simple sarcasm scores) to get a total sarcastic score. We then added the two together to get a total TASIT:S Part 2 score. For TASIT:S Part 3, a total lies score is calculated, as well as a total sarcasm score, and the two are added together to get the total TASIT:S Part 3 score.
 #So, we've now generated the total scores for each of these subtests (TASIT-S Part 1, 2, and 3) for each participant, and correlated these scores with the subtests from the original TASIT (TASIT Part 1, 2, and 3).
 
-#Up to this point, all of the correlations have been made across all groups (that is, scores from both patients and controls from TASIT-S are compared with scores from both patients and controls in the original TASIT). In the following code, correlations were made between TASIT-S and TASIT sub-scores between patients (SSDs) and controls separately.
+#Up to this point, all of the correlations have been done across all groups (that is, both patient and control scores together from TASIT-S are compared with patient and control scores together in the original TASIT). In the following code, correlations were made between TASIT-S and TASIT sub-scores between patients (SSDs) and controls separately.
 
-#Making correlations between the scores of control group participants only
-#First, I need to filter the original dataset in such a way that I can only see the control group scores
+#Making correlations between the scores of control group participants ONLY
+#First, we need to filter the original dataset so that we only have the control group scores
 control_data <- subset(spinsdata, redcap_event_name == "control_arm_1")
 #Could have used "diagnostic_group" variable instead of "redcap_event_name"
 print(control_data)
-#When you run this command you will only see the control group data. The patient data (SSDs) has been removed
+#A dataset with control scores only has now been made. The patient data (SSDs) has been removed
 #Now get the control group scores of the tests that you want to correlate. Let's work with control group scores from TASIT-S Part 1 and TASIT Part 1 (total scores of TASIT-S Part 1 and TASIT Part 1 of the control groups)
 
 #Control Group correlations
@@ -207,7 +205,7 @@ cor.test(control_data$tasit_part2_total, control_data$tasits_part2_total)
 cor.test(control_data$tasit_part2_total, control_data$tasits_part2_total,
          method = "spearman", exact = FALSE)
 
-#correlation between TASIT-S:2 sincere and TASIT:2 sincere
+#correlation between TASIT-S:2 sincere and TASIT:2 sincere in controls
 cor(na.omit(control_data[c("tasit_part2_sinc", "tasits_part2_sinc")]))
 #correlation that produces p values:
 cor.test(control_data$tasit_part2_sinc, control_data$tasits_part2_sinc)
@@ -215,7 +213,7 @@ cor.test(control_data$tasit_part2_sinc, control_data$tasits_part2_sinc)
 cor.test(control_data$tasit_part2_sinc, control_data$tasits_part2_sinc,
          method = "spearman", exact = FALSE)
 
-#correlation between TASIT-S:2 sarcasm and TASIT:2 sarcasm
+#correlation between TASIT-S:2 sarcasm and TASIT:2 sarcasm in controls
 cor(na.omit(control_data[c("tasit_part2_sarc", "tasits_part2_sarc")]))
 #correlation that produces p values:
 cor.test(control_data$tasit_part2_sarc, control_data$tasits_part2_sarc)
@@ -224,7 +222,7 @@ cor.test(control_data$tasit_part2_sarc, control_data$tasits_part2_sarc,
          method = "spearman", exact = FALSE)
 
 
-#TASIT-S:3 and TASIT:3 Correlations:
+#TASIT-S:3 and TASIT:3 correlations in controls:
 cor(na.omit(control_data[c("tasit_part3_total", "tasits_part3_total")]))
 #correlation that produces p values:
 cor.test(control_data$tasit_part3_total, control_data$tasits_part3_total)
@@ -253,7 +251,7 @@ cor.test(control_data$tasits_part3_sarc, control_data$tasit_part3_sarc,
 
 ```{r}
 #Making correlations between the scores of patients (SSDs) only
-#First, I need to filter the original dataset in such a way that I can only see the patient group scores
+#First, we need to filter the original dataset so that we only have the patient group scores
 patient_data <- subset(spinsdata, redcap_event_name == "case_arm_2")
 #Could have used "diagnostic_group" variable instead of "redcap_event_name"
 print(patient_data)
@@ -274,7 +272,7 @@ cor.test(patient_data$tasit_part2_total, patient_data$tasits_part2_total)
 cor.test(patient_data$tasit_part2_total, patient_data$tasits_part2_total,
          method = "spearman", exact = FALSE)
 
-#correlation between TASIT-S:2 sincere and TASIT:2 sincere
+#correlation between TASIT-S:2 sincere and TASIT:2 sincere in patients
 cor(na.omit(patient_data[c("tasit_part2_sinc", "tasits_part2_sinc")]))
 #correlation that produces p values:
 cor.test(patient_data$tasit_part2_sinc, patient_data$tasits_part2_sinc)
@@ -282,7 +280,7 @@ cor.test(patient_data$tasit_part2_sinc, patient_data$tasits_part2_sinc)
 cor.test(patient_data$tasit_part2_sinc, patient_data$tasits_part2_sinc,
          method = "spearman", exact = FALSE)
 
-#correlation between TASIT-S:2 sarcasm and TASIT:2 sarcasm
+#correlation between TASIT-S:2 sarcasm and TASIT:2 sarcasm in patients
 cor(na.omit(patient_data[c("tasit_part2_sarc", "tasits_part2_sarc")]))
 #correlation that produces p values:
 cor.test(patient_data$tasit_part2_sarc, patient_data$tasits_part2_sarc)
@@ -291,7 +289,7 @@ cor.test(patient_data$tasit_part2_sarc, patient_data$tasits_part2_sarc,
          method = "spearman", exact = FALSE)
 
 
-#TASIT-S:3 and TASIT:3 Correlations:
+#TASIT-S:3 and TASIT:3 correlations in patients:
 cor(na.omit(patient_data[c("tasit_part3_total", "tasits_part3_total")]))
 #correlation that produces p values:
 cor.test(patient_data$tasit_part3_total, patient_data$tasits_part3_total)
@@ -319,9 +317,8 @@ cor.test(patient_data$tasits_part3_sarc, patient_data$tasit_part3_sarc,
 
 
 ```{r}
-#Trying to make a data-set that only contains TASIT:S scores (removing original TASIT scores)
-#Run all of the data up to this point so that the total subscore variables for TASIT-S are existing in the dataset.
-#Can use the following function to create a new variable (which is the TASIT-S dataset) that only contains TASIT-S scores. This is done by only including the data from the columns (aka, the specific TASIT:S tests) that we want to see.
+#Making a data-set that only contains TASIT:S scores (removing original TASIT scores)
+#Run all of the code up to this point so that the total subscore variables for TASIT-S are existing in the dataset.
 
 tasits_data_only <- spinsdata[, c("record_id", "redcap_event_name", "tasits_part1_total", "tasits_part2_sinc", "tasits_part2_sarc", "tasits_part2_total", "tasits_part3_lies", "tasits_part3_sarc", "tasits_part3_total")]
 print(tasits_data_only)
@@ -338,18 +335,18 @@ control_data_tasits <- subset(tasits_data_only, redcap_event_name == "control_ar
 #Checking to see which participants have missing TASIT-S scores
 tasits_data_only[!complete.cases(tasits_data_only),]
 
-#Checking to see what specific scores these participants are missing. When doing this step, make sure to rerun the entire script so that participants who were meant to be removed earlier on in the script are removed here as well. To check for missingness in each participant, just replace the record ID in the code below. We can then remove any of these participants from the original spinsdata, and then rerun the entire script to make sure our correlations are updated without any missing values.
+#Checking to see what specific scores these participants are missing. When doing this step, make sure the entire script has been run up to this point so that participants who were meant to be removed earlier on in the script are removed here as well. To check for specific missing scores in each participant, just replace the record ID in the code below. We can then remove any of these participants from the original spinsdata, and then rerun the entire script to make sure our correlations are updated without any missing values.
 subset(spinsdata, record_id == "SPN01_ZHP_0172")
 #The next step is to then remove the participants who are missing data from the "spinsdata" dataset, which is done at the beginning of the script (lines 30/31).
-#If the code is up to date, the table for missingness that is generated at this chunk should be empty, as all participants with missing data are removed.
+#If the code is up to date, the table for missingness that is generated in this chunk should be empty, as all participants with missing data have been removed.
 ```
 
 
 
 ```{r}
-#Checking distributions of variables in datasets - only TASIT-S variables and only TASIT variables
+#Looking at distributions of variables in datasets - only TASIT-S variables and only TASIT variables
 #TASIT-S Distributions:
-#TASIT-S: need to melt data first, as ggplot function only uses long data format
+#TASIT-S: need to melt data first, as ggplot function only uses long data format. So we subset the data (to select which columns/variables that we want to graph), and then we melt this data.
 
 library(ggplot2)
 library(reshape)
@@ -359,13 +356,11 @@ tasits_distribution <- tasits_data_only[, c(1,3:9)]
 tasits_distribution <- melt(tasits_distribution)
 print(tasits_distribution)
 
-#Note: we need to melt the dataset because ggplot only uses long format datasets. So we subset the data (to select which columns/variables that we want to graph), and then we melt this data.
-
 ggplot(data = tasits_distribution, mapping = aes(x = value)) +
   geom_histogram(bins = 10) + facet_wrap(~variable, scales = 'free_x')
 
 #TASIT Distributions:
-#TASIT: Making distributions for variables that were used to make correlations with TASIT-S variables. Need to melt data first, as ggplot function only uses long data format.
+#TASIT: Making distributions for variables that were used to make correlations with TASIT-S variables. Need to melt data first again.
 
 tasit_distribution <- spinsdata[, c("record_id", "tasit_part1_total", "tasit_part2_sinc", "tasit_part2_sarc", "tasit_part2_total", "tasit_part3_lies", "tasit_part3_sarc", "tasit_part3_total")]
 tasit_distribution <- melt(tasit_distribution)
@@ -377,7 +372,8 @@ ggplot(data = tasit_distribution, mapping = aes(x = value)) +
 
 #Check for normality using Shapiro-Wilkin's Test:
 #Shapiro-Wilk Test for Normality: If the test is non-significant (p>. 05) it tells us that the distribution of the sample is not significantly different from a normal distribution. If, however, the test is significant (p < . 05) then the distribution in question is significantly different from a normal distribution (and we are expecting a non-normal distribution).
-#Note: for the shapiro test, you cannot use the variable "tasits_distribution" or "tasit_distribution" because you melted these datasets in the code above this, meaning that those variables that you would otherwise be testing normality for, no longer exist in separate columns, but rather all exist under the column "variable" (and now only a few columns exist, rather than all of the columns for the variables). Therefore, use a dataset that has not been melted, and contains the variables that you want to check normality for.
+
+#Note: for the shapiro test, you cannot use the variables "tasits_distribution" or "tasit_distribution" because you melted these datasets in the code above this, meaning that those variables that you would otherwise be testing normality for, no longer exist in separate columns, but they all exist under the column "variable" (and now only a few columns exist, rather than all of the columns for the variables). Therefore, use a dataset that has not been melted, and contains the variables that you want to check normality for.
 
 #TASIT-S:
 apply(tasits_data_only[,3:9], 2, shapiro.test)
@@ -391,11 +387,11 @@ apply(tasit_distribution_shapirotest[,2:8], 2, shapiro.test)
 
 
 ```{r}
-#Using bootstrap T test p values and Cohen's d effect sizes to determine diagnostic group differentiation in each form of the test. This will show us how similarly TASIT-S differentiates between groups to TASIT.
-#What we're doing here is taking one TASIT subtest (ex: TASIT Part 3 Lies), and comparing the mean score of the control group to the mean score of the SSD group (completing a T test between the two). We will then complete the same process with the TASIT-S form of the subtest (ex: TASIT-S Part 3 Lies), so that we can compare group differences seen in the original form of the test to group differences seen in the short form of the test, effectively showing us if the short form of the test produces the same results (diagnostic group differentiation) as the original TASIT.
+#Using bootstrap T test p values and Cohen's d effect sizes to determine diagnostic group differentiation in each form of the test. This will show us how similarly TASIT-S differentiates between SSDs and controls to TASIT.
+#What we're doing here is taking one TASIT subtest (ex: TASIT Part 3 Lies), and comparing the mean score of the control group to the mean score of the SSD group (completing a T test between the two). We will then complete the same process with the TASIT-S form of the subtest (ex: TASIT-S Part 3 Lies), so that we can compare group differences seen in the original form of the test to group differences seen in the short form of the test, showing us if the short form of the test produces the same results (diagnostic group differentiation) as the original TASIT.
 
 library(MKinfer)
-#TASIT T-tests:
+#TASIT T-tests (by diagnostic group):
 boot.t.test(tasit_part1_total ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
 boot.t.test(tasit_part2_sinc ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
 boot.t.test(tasit_part2_sarc ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
@@ -403,7 +399,7 @@ boot.t.test(tasit_part2_total ~ diagnostic_group, data=spinsdata, paired=FALSE, 
 boot.t.test(tasit_part3_lies ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
 boot.t.test(tasit_part3_sarc ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
 boot.t.test(tasit_part3_total ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
-#TASIT-S T-tests:
+#TASIT-S T-tests (by diagnostic group):
 boot.t.test(tasits_part1_total ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
 boot.t.test(tasits_part2_sinc ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
 boot.t.test(tasits_part2_sarc ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
@@ -412,17 +408,17 @@ boot.t.test(tasits_part3_lies ~ diagnostic_group, data=spinsdata, paired=FALSE, 
 boot.t.test(tasits_part3_sarc ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
 boot.t.test(tasits_part3_total ~ diagnostic_group, data=spinsdata, paired=FALSE, R=1000)
 
-#T-tests are done here to see if the original TASIT and TASIT-S subscores show similar differentiation between our SSD and control groups (i.e., are similar group differences seen with the original TASIT and TASIT-S, based on the p values and, later on, effect sizes produced - should see similar p values and Cohen's d effect sizes in both forms of the test for each subtest).
+#T-tests are done here to see if the TASIT and TASIT-S subscores show similar differentiation between our SSD and control groups (i.e., are similar group differences seen with the original TASIT and TASIT-S, based on the p values and, later on, effect sizes produced - should see similar p values and Cohen's d effect sizes in both forms of the test for each subtest).
 #P-value in T test will tell you if the differences in the mean score of controls and SSDs is significantly different (for that specific subtest).
 
 
 #T-tests by sex - have to merge datasets first as "spinsdata" dataset does not include sex variable
-#merge by record_id = merge datasets by variable record_id (merge "spinsdata" dataset, which contains TASIT data of the participants, and "spins_df" dataset, which contains the social cognitive and other important measures of the participants)
+#merge by record_id = merge datasets by variable record_id (merge "spinsdata" dataset, which contains TASIT data of the participants, and "spins_df" dataset, which contains the social cognitive and other important measures of the participants, and most importantly the sex of the participants)
 #Merging the datasets:
 spins_total_data <- merge(spinsdata,spins_df,by="record_id")
 print(spins_total_data)
 
-#TASIT T-tests:
+#TASIT T-tests by sex:
 boot.t.test(tasit_part1_total ~ demo_sex, data=spins_total_data, paired=FALSE, R=1000)
 boot.t.test(tasit_part2_sinc ~ demo_sex, data=spins_total_data, paired=FALSE, R=1000)
 boot.t.test(tasit_part2_sarc ~ demo_sex, data=spins_total_data, paired=FALSE, R=1000)
@@ -430,7 +426,7 @@ boot.t.test(tasit_part2_total ~ demo_sex, data=spins_total_data, paired=FALSE, R
 boot.t.test(tasit_part3_lies ~ demo_sex, data=spins_total_data, paired=FALSE, R=1000)
 boot.t.test(tasit_part3_sarc ~ demo_sex, data=spins_total_data, paired=FALSE, R=1000)
 boot.t.test(tasit_part3_total ~ demo_sex, data=spins_total_data, paired=FALSE, R=1000)
-#TASIT-S T-tests:
+#TASIT-S T-tests by sex:
 boot.t.test(tasits_part1_total ~ demo_sex, data=spins_total_data, paired=FALSE, R=1000)
 boot.t.test(tasits_part2_sinc ~ demo_sex, data=spins_total_data, paired=FALSE, R=1000)
 boot.t.test(tasits_part2_sarc ~ demo_sex, data=spins_total_data, paired=FALSE, R=1000)
@@ -441,6 +437,7 @@ boot.t.test(tasits_part3_total ~ demo_sex, data=spins_total_data, paired=FALSE, 
 
 
 #Next: Cohen's d effect sizes
+#Cohen's d is designed for comparing two groups. It takes the difference between two means and expresses it in standard deviation units. It tells you how many standard deviations lie between the two means.
 #TASIT effect sizes (by diagnostic_group)
 library(effsize)
 cohen.d(tasit_part1_total ~ diagnostic_group, data=spinsdata)
@@ -450,7 +447,7 @@ cohen.d(tasit_part2_total ~ diagnostic_group, data=spinsdata)
 cohen.d(tasit_part3_lies ~ diagnostic_group, data=spinsdata)
 cohen.d(tasit_part3_sarc ~ diagnostic_group, data=spinsdata)
 cohen.d(tasit_part3_total ~ diagnostic_group, data=spinsdata)
-#TASIT-S effect sizes (by redcap_id)
+#TASIT-S effect sizes (by diagnostic_group)
 cohen.d(tasits_part1_total ~ diagnostic_group, data=spinsdata)
 cohen.d(tasits_part2_sinc ~ diagnostic_group, data=spinsdata)
 cohen.d(tasits_part2_sarc ~ diagnostic_group, data=spinsdata)
@@ -477,10 +474,8 @@ cohen.d(tasits_part3_lies ~ demo_sex, data=spins_total_data)
 cohen.d(tasits_part3_sarc ~ demo_sex, data=spins_total_data)
 cohen.d(tasits_part3_total ~ demo_sex, data=spins_total_data)
 
-#Cohen's d. Cohen's d is designed for comparing two groups. It takes the difference between two means and expresses it in standard deviation units. It tells you how many standard deviations lie between the two means.
-
 #Note: did not only merge specific variables from spins_df dataset into spinsdata. Instead, I merged all of the variables from spin_df with spinsdata. 
-#Merging SPECIFIC spins_df variables with spinsdata dataset ("specific" meaning the variables that we will actually be using from this dataset):
+#Merging SPECIFIC spins_df variables with spinsdata dataset ("specific" meaning the variables that we will actually be using from this dataset). First need to create this datset that contains the measures we actually care about:
 
 spins_df_specific <- spins_df[, c("record_id","scog_er40_total", "scog_rmet_total","scog_mean_ea", "scog_iri_perspective", "scog_iri_fantasy", "scog_iri_personal_distress", "scog_iri_empathic_concern", "bsfs_total","qls_total", "np_domain_tscore_process_speed", "np_domain_tscore_att_vigilance", "np_domain_tscore_work_mem", "np_domain_tscore_verbal_learning", "np_domain_tscore_visual_learning", "np_domain_tscore_reasoning_ps", "np_domain_tscore_social_cog", "bprs_factor_total", "sans_total_sc", "demo_age_study_entry")]
 
@@ -493,19 +488,18 @@ print(spins_total_data_specific)
 
 ```{r}
 #Making distributions for other relevant social cognitive measures.
-#Still need to subset the data because the id variable must be apparent when making distributions, even though all of the variables in this dataset are being graphed.
 spins_df_specific <- melt(spins_df_specific)
 ggplot(data = spins_df_specific, mapping = aes(x = value)) +
   geom_histogram(bins = 10) + facet_wrap(~variable, scales = 'free_x')
 
 #Checking Normality
-#Need to make a dataset that is not melted however:
+#Need to make a dataset that is not melted:
 spins_df_specific_shapirotest <- spins_df[, c("record_id","scog_er40_total", "scog_rmet_total","scog_mean_ea", "scog_iri_perspective", "scog_iri_fantasy", "scog_iri_personal_distress", "scog_iri_empathic_concern", "bsfs_total","qls_total", "np_domain_tscore_process_speed", "np_domain_tscore_att_vigilance", "np_domain_tscore_work_mem", "np_domain_tscore_verbal_learning", "np_domain_tscore_visual_learning", "np_domain_tscore_reasoning_ps", "np_domain_tscore_social_cog", "bprs_factor_total", "sans_total_sc", "demo_sex", "demo_age_study_entry")]
 
 #Checking Normality of distributions
 apply(spins_df_specific_shapirotest[,c(2:19,21)], 2, shapiro.test)
 
-# shapiro.test(spins_df_specific_shapirotest$demo_sex) was not included for the shapiro.test as "demo_sex" is a non numeric variable. It was also removed from the original distributions for the same reason. So, "demo_sex" variable was removed from "spins_df_specific" dataset and "spins_df_specific_shapirotest" dataset. It still remained in the original "spins_df" dataset though because this dataset was merged with "spinsdata" dataset to make T tests that were done based on sex (so this variable was required in this dataset). This way, the correlations for the soc cog data vs TASIT-S data will not include any "demo_sex" correlations (because the dataset used for these correlations does not include "demo_sex" (which is the spins_df_specific dataset. This is the dataset that was merged with spinsdata to make correlations between TASIT-S and other relevant measures)).
+#Note: "demo_sex" variable was not included for the shapiro.test because it is a non numeric variable. It was also removed from the original distributions for the same reason. So, "demo_sex" variable was removed from "spins_df_specific" dataset and "spins_df_specific_shapirotest" dataset. It still remained in the original "spins_df" dataset though because this dataset was merged with "spinsdata" dataset to make T tests that were done based on sex (so this variable was required in this dataset). This way, the correlations for the soc cog data vs TASIT-S (later in script) data will not include any "demo_sex" correlations (because the dataset used for these correlations does not include "demo_sex" (which is the spins_df_specific dataset. This is the dataset that was merged with spinsdata to make correlations between TASIT-S and other relevant measures)).
 ```
 
 
@@ -543,42 +537,38 @@ apply(spins_df_specific_shapirotest[,c(2:19,21)], 2, shapiro.test)
 #So that we don't have to do the correlations one by one/line by line, we can use the "rcorr" function (didn't realize this until now, which is why some code written earlier was done line by line):
 #Note: The as.numeric function in R is used to convert a character vector into a numeric vector.
 library("Hmisc")
-#Correlations across all groups
+#Correlations across all groups:
 rcorr(apply(spins_total_data_specific[,c(265:270,272:289)],2, as.numeric))
 #Correlations within cases only:
 rcorr(apply(spins_total_data_specific[spins_total_data_specific$diagnostic_group=="case",c(265:270,272:289)],2, as.numeric))
-#Correlations within controls only: Note: have to remove variables "bprs_factor_total", "sans_total_sc", and "qls_total" from this correlation between controls only, because these measures were only completed in case participants. These variables are column numbers 289, 290, and 281. If these were included, NA values would be seen in the correlations)
+#Correlations within controls only: Note - have to remove variables "bprs_factor_total", "sans_total_sc", and "qls_total" from this correlation between controls only, because these measures were only completed in case participants. These variables are column numbers 289, 290, and 281. If these were included, NA values would be seen in the correlations)
 rcorr(apply(spins_total_data_specific[spins_total_data_specific$diagnostic_group=="control",c(265:270,272:289)],2, as.numeric))
-#Note - "demo_sex" variable was removed from "spins_df_specific" dataset, as it is non numerical, and correlations are being done here (to be clear: "spins_df_specific" datset was merged with "spinsdata" to produce "spins_total_data_specific", which is the dataset used for these current correlations). "Demo_sex" was kept in the original "spins_df" dataset (as mentioned before) however because T tests were done by sex earlier in the script, which requires "demo_sex" in the dataset (to be clear: "spins_df" dataset was merged with "spinsdata" to produce "spins_total_data", which was the dataset used to make T tests).
+#Note - "demo_sex" variable was removed from "spins_df_specific" dataset, as it is non numerical, and correlations are being done here (to be clear: "spins_df_specific" datset was merged with "spinsdata" to produce "spins_total_data_specific", which is the dataset used for the correlations in this chunk). "Demo_sex" was kept in the original "spins_df" dataset (as mentioned before) however because T tests were done by sex earlier in the script, which requires "demo_sex" in the dataset (to be clear: "spins_df" dataset was merged with "spinsdata" to produce "spins_total_data", which was the dataset used to make T tests).
 ```
 
 
 ```{r, fig.width = 4, fig.height = 6}
-#Visualizations 
+#Visualizations: 
 
-#Creating tables
-
-#Make new spins_df dataset that contains all of the variables that we would like to use for this first table (ex: age, education)
-#This new variable "spins_df_table1" contains some new variables as well as all of the variable that are in the "spins_df_specific" dataset
-
-#Table 1 
-spins_df_table1 <- spins_df[, c("diagnostic_group", "demo_sex", "demo_age_study_entry", "demo_highest_grade_self", "scog_er40_total", "scog_rmet_total","scog_mean_ea", "scog_iri_perspective", "scog_iri_fantasy", "scog_iri_personal_distress", "scog_iri_empathic_concern", "bsfs_total","qls_total", "np_domain_tscore_process_speed", "np_domain_tscore_att_vigilance", "np_domain_tscore_work_mem", "np_domain_tscore_verbal_learning", "np_domain_tscore_visual_learning", "np_domain_tscore_reasoning_ps", "np_domain_tscore_social_cog", "bprs_factor_total", "sans_total_sc")]
+#Creating tables:
+#--------------------
+#The first table that we will make contains the scores of some other relevant measures (that are not TASIT measures). First make a new spins_df dataset that contains all of the variables/measures that we would like to use for this first table (ex: age, education)
+#Dataset that will be used for Table #1:
+spins_df_table1 <- spins_df[, c("diagnostic_group", "demo_sex", "demo_age_study_entry", "demo_highest_grade_self")]
 library(tableone)
-table1 <- CreateTableOne(data = spins_df_table1[,c(1:22)], strata = c("diagnostic_group"))
+
+#Making Table #1
+table1 <- CreateTableOne(data = spins_df_table1[,c(1:4)], strata = c("diagnostic_group"))
 print(table1, contDigits = 3)
-#table I think I might use instead of table 1 though:
-#Table 1 
-spins_df_table1_other <- spins_df[, c("diagnostic_group", "demo_sex", "demo_age_study_entry", "demo_highest_grade_self")]
-table1other <- CreateTableOne(data = spins_df_table1_other[,c(1:4)], strata = c("diagnostic_group"))
-print(table1other, contDigits = 3)
 
-#Table 5 
-spinsdata_table5 <- spins_total_data_specific[, c("diagnostic_group", "tasit_part1_total","tasit_part2_sinc", "tasit_part2_sarc", "tasit_part2_total", "tasit_part3_lies", "tasit_part3_sarc", "tasit_part3_total", "tasits_part1_total", "tasits_part2_sinc", "tasits_part2_sarc", "tasits_part2_total", "tasits_part3_lies", "tasits_part3_sarc", "tasits_part3_total")]
-table5 <- CreateTableOne(data = spinsdata_table5[,c(1:15)], strata = c("diagnostic_group"))
+#Making Table #2 (this is a table containing TASIT and TASIT-S scores)
+spinsdata_table2 <- spins_total_data_specific[, c("diagnostic_group", "tasit_part1_total","tasit_part2_sinc", "tasit_part2_sarc", "tasit_part2_total", "tasit_part3_lies", "tasit_part3_sarc", "tasit_part3_total", "tasits_part1_total", "tasits_part2_sinc", "tasits_part2_sarc", "tasits_part2_total", "tasits_part3_lies", "tasits_part3_sarc", "tasits_part3_total")]
+table2 <- CreateTableOne(data = spinsdata_table2[,c(1:15)], strata = c("diagnostic_group"))
+print(table2, contDigits = 3)
 
 
-
-#Box plot graphs - case vs controls
+#Creating Box plot graphs - case vs controls (for both TASIT and TASIT-S):
+#--------------------
 library(ggplot2)
 #Box plots I made were for TASIT and TASIT-S Part 3 Total scores
 #TASIT-S box plot
@@ -589,6 +579,7 @@ plot1 <- ggplot(spins_total_data_specific, aes(x = diagnostic_group, y = tasits_
   geom_jitter(shape=16, position=position_jitterdodge()) +
  scale_colour_discrete(labels=c("SSD","Control"))
   # guides(fill=guide_legend(title="Diagnostic Group"))
+
 #TASIT box plot
 plot2 <- ggplot(spins_total_data_specific, aes(x = diagnostic_group, y = tasit_part3_total, col = diagnostic_group)) +
   # col (or colour) has been specified to represent the diagnostic group
@@ -599,34 +590,22 @@ plot2 <- ggplot(spins_total_data_specific, aes(x = diagnostic_group, y = tasit_p
 
 print(plot1)
 print(plot2)
-
-
-#To save these plots as images:  
-#ggsave("plot4.png", plot4, dpi=750)
-  # guides(fill=guide_legend(title="Diagnostic Group"))
-#ggsave("plot4.png", dpi=750)
-#?ggsave
-#jpeg("/mnt/tigrlab/scratch/aolorunsola/plot4.jpeg", quality = 100)
-#### how to save images in higher resolution ####
-# print(name_of_your_plot)
-# in the bottom right panel click on plots > export
-# select "save as image"
-# select the 'TIFF' format (instead of 'PNG' for higher resolution)
-# check the path and name of your file
 ```
 
 
 
 
 ```{r}
-#Some more visualizations:
+#Visualizations Part 2:
 
 #Correlation matrix: TASIT vs TASIT-S
+#--------------------
 library(corrplot)
-#The following data frame only contains TASIT variables that we are interested in ("spinsdata" datset contained many TASIT measures, a lot of which we are not interested in):
+#The following data frame only contains TASIT variables that we are interested in ("spinsdata" dataset contained many TASIT measures, a lot of which we are not interested in):
 tasit_data_only <- spinsdata[, c("record_id", "tasit_part1_total", "tasit_part2_sinc", "tasit_part2_sarc", "tasit_part2_total", "tasit_part3_lies", "tasit_part3_sarc", "tasit_part3_total")]
+#Dataset that only contains TASIT-S variables:
 tasits_data_only_1 <- spinsdata[, c("record_id", "tasits_part1_total", "tasits_part2_sinc", "tasits_part2_sarc", "tasits_part2_total", "tasits_part3_lies", "tasits_part3_sarc", "tasits_part3_total")]
-#made it tasits_data_only_1 because the original tasits_data_only variable contained the redcap_event variable, which I didn't want in the dataset
+#Note: named it tasits_data_only_1 because the original tasits_data_only variable (made earlier in script and was used to check for missingness) contained the redcap_event variable, which I don't want in the dataset
 #Merging the tasit-s and tasit only datasets, so that we have a dataset that only includes tasit and tasit-s variables that we care about
 tasit_tasits_merged <- merge(tasit_data_only,tasits_data_only_1,by="record_id")
 #remove redcap_id variable because it is not numeric
@@ -635,7 +614,8 @@ tasit_tasits_correlation <- cor(tasit_tasits_merged)
 corrplot(tl.col = "black", tasit_tasits_correlation, method = 'color')
 
 
-#Correlation matrix: TASIT-S vs other measures
+#Correlation matrix: TASIT-S vs other relevant measures
+#--------------------
 othercorrelation <- spins_total_data_specific[,c(263,265,266,267,269,270,271,273,274,280)]
 othercorrelation <- cor(othercorrelation, use = "complete.obs")
 corrplot(tl.col = "black", othercorrelation, method = 'color')
@@ -643,10 +623,10 @@ corrplot(tl.col = "black", othercorrelation, method = 'color')
 
 
 
-#Scatterplot
-#Make a dataset that only includes case data, as for this scatterplot I will be using "sans_total" measurement, which is not found in controls:
+#Scatterplot:
+#--------------------
+#Make a dataset that only includes case data, as for this scatterplot I will be using the "sans_total" measurement, which was not completed in controls:
 patient_data_specific <- subset(spins_total_data_specific, diagnostic_group == "case")
-print(patient_data_specific)
 
 library(ggplot2)
 ggplot(patient_data_specific, aes(x=tasits_part3_total, y=sans_total_sc)) +
@@ -661,29 +641,34 @@ ggplot(patient_data_specific, aes(x=tasits_part3_total, y=sans_total_sc)) +
 #Finding out some more values for scatterplot (r values, spearman's correlations, etc)
 #correlation between TASIT-S 3 total score and SANS measure
 cor(na.omit(patient_data_specific[c("tasits_part3_total", "sans_total_sc")]))
-#can also use "rcorr" function (for multiple variables)
 #correlation that produces p values:
 cor.test(patient_data_specific$tasits_part3_total, patient_data_specific$sans_total_sc) 
 #correlation using spearman's coefficients:
 cor.test(patient_data_specific$tasits_part3_total, patient_data_specific$sans_total_sc,
          method = "spearman", exact = FALSE)
-
-
-
-
-#send table of missingness with other dataset that contains other measures
 ```
 ```{r}
-#Checking for other measure missingness:
-#send table of missingness with other dataset that contains other measures
-#We know that with all of the TASIT/TASIT-S values that we care about, there is no missing data (as we have already removed individuals with missing TASIT scores of interest). We therefore only need to check spins_df_specific_shapriotest to see who is missing data here
-#Data frame that contains all participants with missing scores. Note - these participants only have missing scores from other measures. All of their TASIT/TASIT-S scores that we are interested in are filled (not missing)
+#Checking for participant missingness in other relevant measures:
+#We know that with all of the TASIT/TASIT-S values that we care about, there is no missing data (as we have already removed individuals with missing TASIT scores of interest). We therefore only need to check the "spins_df_specific_shapriotest" dataset to see who is missing data here. Basically, we are checking who has any missing data in these other relvant measures. (Note: "spins_df_specific_shapriotest" is the non melted complete dataset that contains all other measures of interest).
+
+#Creating data frame that contains all participants with missing scores. Note - these participants only have missing scores from other measures. All of their TASIT/TASIT-S scores that we are interested in are present (not missing)
 #Also note - did not include variables: "bprs_factor_total, sans_total_sc, or qls_total, as we know that these measures were only completed in SSDs, so including them here would not make sense as we know about half of the individuals in the study (controls) are missing this data. We are intereseted in individuals who are missing other measures. 
 
 missingnesstable <- spins_df[, c("record_id","diagnostic_group", "scog_er40_total", "scog_rmet_total","scog_mean_ea", "scog_iri_perspective", "scog_iri_fantasy", "scog_iri_personal_distress", "scog_iri_empathic_concern", "bsfs_total", "np_domain_tscore_process_speed", "np_domain_tscore_att_vigilance", "np_domain_tscore_work_mem", "np_domain_tscore_verbal_learning", "np_domain_tscore_visual_learning", "np_domain_tscore_reasoning_ps", "np_domain_tscore_social_cog", "demo_age_study_entry")]
 
-missingnesstable[!complete.cases(missingnesstable),]
+#Data frame containing individuals with missing data:
+individuals_missing_data <- missingnesstable[!complete.cases(missingnesstable),]
+print(individuals_missing_data)
 
-#Any participant in this data frame has some missing measures. These missing measures are NOT TASIT variables, but are from the other soc cog, neuro cog, etc measures. This is because the data has already been filtered to remove individuals with missing TASIT data. 
+#Any participant in this data frame has some missing measures. These missing measures are NOT TASIT variables, but are from the other soc cog, neuro cog, etc measures. 
+
+#Create a missingness table for cases - include three other relevant measures (qls_total, bprs_factor_total, sans_total_sc):
+missingnesstable_cases <- spins_df[, c("record_id","diagnostic_group", "scog_er40_total", "scog_rmet_total","scog_mean_ea", "scog_iri_perspective", "scog_iri_fantasy", "scog_iri_personal_distress", "scog_iri_empathic_concern", "bsfs_total", "np_domain_tscore_process_speed", "np_domain_tscore_att_vigilance", "np_domain_tscore_work_mem", "np_domain_tscore_verbal_learning", "np_domain_tscore_visual_learning", "np_domain_tscore_reasoning_ps", "np_domain_tscore_social_cog", "demo_age_study_entry", "qls_total", "bprs_factor_total", "sans_total_sc")]
+
+missingnesstable_cases <- subset(missingnesstable_cases, diagnostic_group == "case")
+cases_missing_data <- missingnesstable_cases[!complete.cases(missingnesstable_cases),]
+print(cases_missing_data)
+
+#Looking at cases and their scores for the qls_total, bprs_factor_total, and the sans_total_sc: Only two individuals had any missing scores (which were both from the qls_total measure). All other cases had no missing values for these three measures. IDs are SPN01_CMH_0002 and SPN01_ZHP_0129
 ```
 
